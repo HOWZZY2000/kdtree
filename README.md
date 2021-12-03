@@ -1,6 +1,6 @@
 ## KD-tree
 KD-tree is a binary search tree where data in each node is a K-Dimensional point in space.  
-It has a construction time of O(nlogn) and range search of O(s + sqrt(n)) time complexity for second dimensions.
+It has a construction time of O(nlogn) and range search of O(s + sqrt(n)) time complexity for second dimensions where s is the output size.
 
 This project implemented a KD-tree for second dimensions including functions like build, range-search and delete along with other utility functions like print and reset. 
 ## Usage
