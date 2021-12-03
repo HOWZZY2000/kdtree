@@ -2,7 +2,7 @@
 #include <vector>
 #include <memory>
 #include <random>
-#include <limits>
+#include <limits.h>
 using namespace std;
 
 struct point {
@@ -12,20 +12,14 @@ struct point {
 };
 
 struct node {
-    shared_ptr<point> cur;
-    shared_ptr<node> left;
-    shared_ptr<node> right;
+    shared_ptr<point> cur; // current point
+    shared_ptr<node> left; // left node
+    shared_ptr<node> right; // right node
     node(shared_ptr<point> cur) : cur(cur), left(nullptr), right(nullptr) {};
 };
 
-void m_swap(vector<shared_ptr<point> >&A, int first, int second) {
-    shared_ptr<point> k = A[first];
-    A[first] = A[second];
-    A[second] = k;
-}
-
 int partition(vector<shared_ptr<point> > &A, int p, int level, int start, int end) {
-    m_swap(A, end-1, p);
+    std::swap(A[end-1], A[p]);
     int i = start-1, j = end-1, v, t;
     if (level % 2) {v = A[end-1]->y;} 
     else {v = A[end-1]->x;}
@@ -33,12 +27,13 @@ int partition(vector<shared_ptr<point> > &A, int p, int level, int start, int en
         do {i++; if (level % 2) {t=A[i]->y;} else {t=A[i]->x;}} while (t < v);
         do {j--; if (level % 2) {t=A[j]->y;} else {t=A[j]->x;}} while (j >= i && t > v);
         if (i >= j) break; 
-        else {m_swap(A, i, j);}
+        else {std::swap(A[i], A[j]);}
     }
-    m_swap(A, end-1, i);
+    std::swap(A[end-1], A[i]);
     return i;
 }
 
+// quick select that has the running time of O(n)
 shared_ptr<point> quick_select(vector<shared_ptr<point> >&A, int k, int level, int start, int end) {
     random_device device;
     default_random_engine engine(device());
@@ -54,29 +49,35 @@ shared_ptr<point> quick_select(vector<shared_ptr<point> >&A, int k, int level, i
     }
 }
 
+// floor operation
 int m_floor(int a, int b) {
     return a / b;
 }
 
+// ceiling operation
 int m_ceil(int a, int b) {
     return (a + b - 1) / b;
 }
 
 struct region {
-    int xmax, xmin, ymax, ymin;
+    int xmax, xmin, ymax, ymin; // four cornor of the region
+    // constructor
     region(int xmax, int xmin, int ymax, int ymin) : xmax(xmax), xmin(xmin), ymax(ymax), ymin(ymin) {}
     // copy constructor
     region(const region &r) {xmax = r.xmax; xmin = r.xmin; ymax = r.ymax; ymin = r.ymin;}
 };
 
+// detect if a region belongs to another region
 bool belong(region r1, region r2) {
     return (r1.xmax < r2.xmax && r1.xmin >= r2.xmin && r1.ymax < r2.ymax && r1.ymin >= r2.ymin);
 }
 
+// detect if a region intersects with another region
 bool non_intersection(region r1, region r2) {
     return r1.xmin >= r2.xmax || r2.xmin > r2.xmax || r1.ymin >= r2.ymax || r2.ymin > r1.ymax;
 }
 
+// deletect if a point inside a region
 bool inside(int x, int y, region r2) {
     return (x < r2.xmax && x >= r2.xmin && y < r2.ymax && y >= r2.ymin);
 }
@@ -84,11 +85,11 @@ bool inside(int x, int y, region r2) {
 struct kdtree {
     shared_ptr<node> root = nullptr;
     vector<shared_ptr<point> > A;
-    void build(shared_ptr<node> &cur, int level, int start, int end);
-    void rangeSearch(shared_ptr<node> r, region B, region &T, int level);
-    void print(shared_ptr<node> cur);
-    void print_no_inner_node(shared_ptr<node> cur);
-    void clear();
+    void build(shared_ptr<node> &cur, int level, int start, int end); // build kd tree
+    void rangeSearch(shared_ptr<node> r, region B, region &T, int level); // perform range search
+    void print(shared_ptr<node> cur); // print kd tree including nodes
+    void print_no_inner_node(shared_ptr<node> cur); // print kd tree only leaves
+    void clear(); // delete
 };
 
 void kdtree::build(shared_ptr<node> &cur, int level, int start, int end) {
